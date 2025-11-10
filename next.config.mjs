@@ -18,7 +18,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'http',
-        hostname: 'localhost', // <-- FIX: Izinkan 'localhost'
+        hostname: '127.0.0.1', // <-- FIX: Ganti 'localhost' menjadi '127.0.0.1'
         port: '8000',
         pathname: '/public/uploads/**',
       },
