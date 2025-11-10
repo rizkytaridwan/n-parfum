@@ -4,11 +4,12 @@ import Link from "next/link";
 import { getImageUrl } from "@/lib/utils";
 
 export default function ParfumCard({ parfum }) {
-  if (!parfum) return null;
+  // FIX: Tambahkan pengecekan untuk parfum.slug
+  if (!parfum || !parfum.slug) return null;
 
   return (
     <Link href={`/parfum/${parfum.slug}`} className="block group">
-      <div className="border rounded-lg overflow-hidden shadow-sm bg-white dark:bg-gray-800 dark:border-gray-700 h-full flex flex-col">
+      <div className="border rounded-lg overflow-hidden shadow-sm bg-white dark:bg-gray-800 dark:border-gray-700 h-full flex flex-col transition-shadow duration-300 hover:shadow-lg">
         <div className="relative w-full aspect-square overflow-hidden">
           <Image
             src={getImageUrl(parfum.imageUrl)}
@@ -19,13 +20,13 @@ export default function ParfumCard({ parfum }) {
           />
         </div>
         <div className="p-4 flex-grow flex flex-col">
-          <h3 className="text-xl font-semibold mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+          <h3 className="text-xl font-semibold mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 line-clamp-2">
             {parfum.name}
           </h3>
-          <p className="text-sm text-gray-500 mb-2">
+          <p className="text-sm text-gray-500 mb-2 truncate">
             {parfum.brandName}
           </p>
-          <div className="mt-auto">
+          <div className="mt-auto pt-2">
             <span className="text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-0.5 rounded">
               {parfum.categoryName}
             </span>

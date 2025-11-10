@@ -16,16 +16,38 @@ export async function generateMetadata({ params }) {
     return { title: "Tidak Ditemukan" };
   }
 
-  // Buat deskripsi SEO dari notes
+  const imageUrl = getImageUrl(parfum.imageUrl);
   const topNotes = parfum.pyramid.top.map(n => n.name).join(', ');
-  
+  const description = parfum.description || `Wangi ${parfum.name} oleh ${parfum.brandName}. Temukan aroma ${parfum.categoryName} dengan top notes: ${topNotes}.`;
+
+  // --- SEO TINGKAT TINGGI: JSON-LD Structured Data ---
+  const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: parfum.name,
+  image: imageUrl,
+  description,
+  brand: {
+    '@type': 'Brand',
+    name: parfum.brandName,
+  },
+};
   return {
-    title: `${parfum.name} oleh ${parfum.brandName} - Ensiklopedia Parfum`,
-    description: parfum.description || `Wangi ${parfum.name} memiliki top notes: ${topNotes}.`,
+    title: `${parfum.name} oleh ${parfum.brandName}`,
+    description: description,
+    // URL Kanonis
+    alternates: {
+      canonical: `/parfum/${parfum.slug}`,
+    },
     openGraph: {
-      title: parfum.name,
-      description: parfum.description,
-      images: [getImageUrl(parfum.imageUrl)],
+      title: `${parfum.name} oleh ${parfum.brandName}`,
+      description: description,
+      images: [imageUrl],
+      type: 'product',
+    },
+    // Injeksi JSON-LD
+    other: {
+      'script[type="application/ld+json"]': JSON.stringify(jsonLd),
     },
   };
 }
@@ -40,60 +62,81 @@ export async function generateStaticParams() {
 export default async function ParfumDetailPage({ params }) {
   const parfum = await fetchParfumBySlug(params.slug);
 
-  // Jika parfum tidak ditemukan (mis. slug salah), tampilkan 404
   if (!parfum) {
     notFound();
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-        {/* Kolom Gambar */}
-        <div className="w-full">
-          <Image
-            src={getImageUrl(parfum.imageUrl)}
-            alt={`Parfum ${parfum.name}`}
-            width={500}
-            height={500}
-            className="rounded-lg shadow-lg object-cover w-full aspect-square"
-          />
-        </div>
-
-        {/* Kolom Info */}
-        <div className="space-y-4">
-          <h1 className="text-4xl font-extrabold">{parfum.name}</h1>
-          <div className="flex items-center space-x-2 text-lg">
-            <span className="text-gray-500">oleh</span>
-            <Link href={`/brand/${parfum.brandSlug}`} className="text-blue-600 hover:underline font-semibold">
-              {parfum.brandName}
-            </Link>
-          </div>
-          
-          <div className="flex items-center space-x-2 text-md">
-            <span className="text-gray-500">Kategori:</span>
-            <Link href={`/category/${parfum.categorySlug}`} className="text-blue-500 hover:underline">
-              {parfum.categoryName}
-            </Link>
+    <>
+      {/* Menambahkan JSON-LD Script tag di body.
+        Next.js 14+ merekomendasikan via metadata, tapi ini cara alternatif
+        jika metadata `other` tidak berfungsi. Cukup gunakan salah satu.
+        Metadata 'other' adalah cara yang lebih modern.
+      */}
+      {/* <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      /> */}
+      
+      <div className="max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+          {/* Kolom Gambar */}
+          <div className="w-full">
+            <Image
+              src={getImageUrl(parfum.imageUrl)}
+              alt={`Parfum ${parfum.name}`}
+              width={500}
+              height={500}
+              className="rounded-lg shadow-lg object-cover w-full aspect-square"
+              priority // Prioritaskan LCP
+            />
           </div>
 
-          {parfum.launchYear && (
-            <p className="text-gray-600">
-              Tahun Rilis: <span className="font-medium">{parfum.launchYear}</span>
-            </p>
-          )}
+          {/* Kolom Info */}
+          <div className="space-y-4">
+            {/* Breadcrumbs Sederhana untuk SEO & UX */}
+            <nav className="text-sm text-gray-500">
+              <Link href="/" className="hover:underline">Home</Link>
+              {' / '}
+              <Link href="/parfum" className="hover:underline">Parfum</Link>
+              {' / '}
+              <span className="font-medium text-gray-700 dark:text-gray-300">{parfum.name}</span>
+            </nav>
 
-          {parfum.description && (
-            <p className="text-gray-700 dark:text-gray-300 text-base leading-relaxed">
-              {parfum.description}
-            </p>
-          )}
+            <h1 className="text-4xl font-extrabold">{parfum.name}</h1>
+            <div className="flex items-center space-x-2 text-lg">
+              <span className="text-gray-500">oleh</span>
+              <Link href={`/brand/${parfum.brandSlug}`} className="text-blue-600 hover:underline font-semibold">
+                {parfum.brandName}
+              </Link>
+            </div>
+            
+            <div className="flex items-center space-x-2 text-md">
+              <span className="text-gray-500">Kategori:</span>
+              <Link href={`/category/${parfum.categorySlug}`} className="text-blue-500 hover:underline">
+                {parfum.categoryName}
+              </Link>
+            </div>
+
+            {parfum.launchYear && (
+              <p className="text-gray-600 dark:text-gray-400">
+                Tahun Rilis: <span className="font-medium text-gray-800 dark:text-gray-200">{parfum.launchYear}</span>
+              </p>
+            )}
+
+            {parfum.description && (
+              <p className="text-gray-700 dark:text-gray-300 text-base leading-relaxed">
+                {parfum.description}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Piramida Aroma */}
+        <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
+          <PyramidDisplay pyramid={parfum.pyramid} />
         </div>
       </div>
-
-      {/* Piramida Aroma */}
-      <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
-        <PyramidDisplay pyramid={parfum.pyramid} />
-      </div>
-    </div>
+    </>
   );
 }

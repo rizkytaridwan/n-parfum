@@ -14,14 +14,23 @@ const nextConfig = {
     root: __dirname,
   },
 
-  // TAMBAHKAN BLOK INI
   images: {
     remotePatterns: [
       {
         protocol: 'http',
-        hostname: 'localhost',
+        hostname: 'localhost', // <-- FIX: Izinkan 'localhost'
         port: '8000',
-        pathname: '/public/uploads/**', // Izinkan semua gambar dari folder ini
+        pathname: '/public/uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.domainanda.com', // GANTI DENGAN DOMAIN API PRODUKSI
+        pathname: '/public/uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com', // Izinkan placeholder
+        pathname: '/**',
       },
     ],
   },

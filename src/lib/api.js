@@ -7,16 +7,19 @@ async function fetchAPI(endpoint, options = {}) {
     headers: {
       'Content-Type': 'application/json',
     },
-    // Gunakan 'no-cache' untuk SSR agar data selalu fresh saat build
-    // atau 'force-cache' untuk SSG
-    next: { revalidate: 10 }, // Revalidasi SSG setiap 10 detik
+    // Gunakan 'no-cache' untuk SSR agar data selalu fresh
+    // atau revalidate untuk ISR
+    next: { revalidate: 60 }, // Revalidasi ISR setiap 60 detik
   };
   
   const res = await fetch(url, { ...defaultOptions, ...options });
 
   if (!res.ok) {
-    console.error(`Fetch error: ${res.statusText} (${res.status}) on ${url}`);
-    // Return null atau throw error tergantung kebutuhan
+    // Jangan log 404 sebagai error server, itu valid
+    if (res.status !== 404) {
+      console.error(`Fetch error: ${res.statusText} (${res.status}) on ${url}`);
+    }
+    // Return null agar page.js bisa handle notFound()
     return null;
   }
   return res.json();
@@ -35,6 +38,7 @@ export async function fetchParfums(params = {}) {
   if (params.search) query.append('search', params.search);
   if (params.brand) query.append('brand', params.brand);
   if (params.category) query.append('category', params.category);
+  if (params.note) query.append('note', params.note); // <-- TAMBAHAN BARU
 
   return fetchAPI(`/parfum?${query.toString()}`);
 }
@@ -44,6 +48,7 @@ export async function fetchParfums(params = {}) {
  * Cocok dengan: getParfumBySlug di parfumController.js
  */
 export async function fetchParfumBySlug(slug) {
+  if (!slug) return null; // Guard tambahan
   return fetchAPI(`/parfum/${slug}`);
 }
 
@@ -79,6 +84,24 @@ export async function fetchCategoryBySlug(slug) {
   return fetchAPI(`/categories/${slug}`);
 }
 
+// --- FUNGSI BARU UNTUK NOTES ---
+
+/**
+ * Mengambil semua notes (untuk filter)
+ */
+export async function fetchAllNotes() {
+  return fetchAPI('/notes');
+}
+
+/**
+ * Mengambil satu note berdasarkan slug
+ */
+export async function fetchNoteBySlug(slug) {
+  return fetchAPI(`/notes/${slug}`);
+}
+
+// --- FUNGSI BARU UNTUK SSG (generateStaticParams) ---
+
 /**
  * Helper untuk SSG (generateStaticParams)
  * Mengambil semua slug parfum
@@ -107,4 +130,14 @@ export async function fetchAllCategorySlugs() {
   const categories = await fetchAPI('/categories');
   if (!categories) return [];
   return categories.map((c) => ({ slug: c.slug }));
+}
+
+/**
+ * Helper untuk SSG (generateStaticParams)
+ * Mengambil semua slug notes
+ */
+export async function fetchAllNoteSlugs() {
+  const notes = await fetchAPI('/notes');
+  if (!notes) return [];
+  return notes.map((n) => ({ slug: n.slug }));
 }
