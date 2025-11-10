@@ -8,7 +8,8 @@ import { notFound } from "next/navigation";
 import ParfumCardAnimated from "@/components/ParfumCardAnimated";
 
 // SEO
-export async function generateMetadata({ params }) {
+export async function generateMetadata({ params: paramsPromise }) { // Ubah nama
+  const params = await paramsPromise; // TAMBAHKAN AWAIT
   const brand = await fetchBrandBySlug(params.slug);
   if (!brand) return { title: "Brand Tidak Ditemukan" };
   return {
@@ -24,7 +25,8 @@ export async function generateStaticParams() {
 }
 
 // Halaman
-export default async function BrandPage({ params }) {
+export default async function BrandPage({ params: paramsPromise }) { // Ubah nama
+  const params = await paramsPromise; // TAMBAHKAN AWAIT
   const brand = await fetchBrandBySlug(params.slug);
   if (!brand) notFound();
 

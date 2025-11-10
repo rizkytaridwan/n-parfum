@@ -9,7 +9,8 @@ import ParfumCardAnimated from "@/components/ParfumCardAnimated";
 import { Frown } from "lucide-react";
 
 // SEO
-export async function generateMetadata({ params }) {
+export async function generateMetadata({ params: paramsPromise }) { // Ubah nama
+  const params = await paramsPromise; // TAMBAHKAN AWAIT
   const note = await fetchNoteBySlug(params.slug);
   if (!note) return { title: "Aroma Tidak Ditemukan" };
   return {
@@ -28,7 +29,8 @@ export async function generateStaticParams() {
 }
 
 // Halaman
-export default async function NotePage({ params }) {
+export default async function NotePage({ params: paramsPromise }) { // Ubah nama
+  const params = await paramsPromise; // TAMBAHKAN AWAIT
   const note = await fetchNoteBySlug(params.slug);
   if (!note) notFound();
 

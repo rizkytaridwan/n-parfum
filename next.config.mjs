@@ -18,18 +18,18 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'http',
-        hostname: '127.0.0.1', // <-- FIX: Ganti 'localhost' menjadi '127.0.0.1'
+        hostname: 'localhost',
         port: '8000',
         pathname: '/public/uploads/**',
       },
       {
         protocol: 'https',
-        hostname: 'api.domainanda.com', // GANTI DENGAN DOMAIN API PRODUKSI
+        hostname: 'api.domainanda.com', 
         pathname: '/public/uploads/**',
       },
       {
         protocol: 'https',
-        hostname: 'via.placeholder.com', // Izinkan placeholder
+        hostname: 'via.placeholder.com', 
         pathname: '/**',
       },
     ],

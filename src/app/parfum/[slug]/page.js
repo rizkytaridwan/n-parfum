@@ -10,8 +10,9 @@ import PyramidDisplay from "@/components/PyramidDisplay";
 import { notFound } from "next/navigation";
 
 // Fungsi untuk SEO dinamis (Judul & Meta Deskripsi)
-export async function generateMetadata({ params }) {
-  const parfum = await fetchParfumBySlug(params.slug);
+export async function generateMetadata({ params: paramsPromise }) { // Ubah nama
+  const params = await paramsPromise; // TAMBAHKAN AWAIT
+  const parfum = await fetchParfumBySlug(params.slug); // Gunakan params.slug
   if (!parfum) {
     return { title: "Tidak Ditemukan" };
   }
@@ -59,8 +60,9 @@ export async function generateStaticParams() {
 }
 
 // Komponen Halaman
-export default async function ParfumDetailPage({ params }) {
-  const parfum = await fetchParfumBySlug(params.slug);
+export default async function ParfumDetailPage({ params: paramsPromise }) { // Ubah nama
+  const params = await paramsPromise; // TAMBAHKAN AWAIT
+  const parfum = await fetchParfumBySlug(params.slug); // Gunakan params.slug
 
   if (!parfum) {
     notFound();
