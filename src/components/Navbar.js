@@ -1,13 +1,15 @@
 // src/components/Navbar.js
 import Link from "next/link";
-import { Scent, Home, Library } from "lucide-react";
+// Ganti 'Scent' menjadi 'FlaskConical'
+import { FlaskConical, Home, Library } from "lucide-react";
 
 export default function Navbar() {
   return (
     <header className="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-50">
       <nav className="container mx-auto px-4 py-4 flex justify-between items-center">
         <Link href="/" className="flex items-center space-x-2 text-2xl font-bold text-blue-600 dark:text-blue-400">
-          <Scent className="h-8 w-8" />
+          {/* Ganti 'Scent' menjadi 'FlaskConical' */}
+          <FlaskConical className="h-8 w-8" />
           <span>Ensiklopedia Parfum</span>
         </Link>
         <div className="flex items-center space-x-6">
